@@ -1,0 +1,5 @@
+.pio
+.idea
+.DS_STORE
+
+src/wifi_config.h
