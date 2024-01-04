@@ -1,13 +1,13 @@
 /*
- * Homey Alam Keypad
+ * Homey Alarm Keypad
  */
-
 
 #include <Arduino.h>
 #include <Homey.h>
 #include "wifi_config.h"
 #include <Keypad.h>
 #include <Preferences.h>
+#include "tones.h"
 
 uint8_t state = 0;
 
@@ -30,15 +30,21 @@ Preferences preferences;
 String pinCode = "0000"; // Default PIN code stored in flash memory
 String currentCommand = "";
 
+const int BUZZER_PIN = 15;
+
 void setState();
 void getState();
 void applyState();
 void beep();
 void parseCommand(const String& command);
-void savePinCodeToFlash(String& newPin);
+void savePinCodeToFlash(String& newPinCode);
+void playSuccessNotes();
+void playErrorNotes();
 
 void setup() {
     Serial.begin(115200);
+
+    pinMode(BUZZER_PIN, OUTPUT);
 
     // Open the preferences storage with read/write access
     preferences.begin("keypad", false);
@@ -124,24 +130,28 @@ void parseCommand(const String& command) {
                 Serial.println("Turning off the alarm");
                 state = 0;
                 applyState();
+                playSuccessNotes();
                 break;
             }
             case 1: {
                 Serial.println("Putting the alarm into sleep mode");
                 state = 1;
                 applyState();
+                playSuccessNotes();
                 break;
             }
             case 2: {
                 Serial.println("Putting the alarm in away mode");
                 state = 1;
                 applyState();
+                playSuccessNotes();
                 break;
             }
             case 8: {
                 Serial.println("Putting the alarm on scheduled mode");
                 state = 8;
                 applyState();
+                playSuccessNotes();
                 break;
             }
             case 99: {
@@ -159,26 +169,42 @@ void parseCommand(const String& command) {
                     Serial.println("Invalid command format");
                 }
 
+                playSuccessNotes();
+                playSuccessNotes();
+
                 break;
             }
             default:
                 Serial.println("Invalid command");
+                playErrorNotes();
         }
     } else {
-        Serial.println("Incorrect PIN");
+        Serial.println("Incorrect PIN code");
+        playErrorNotes();
     }
 }
 
 
-void savePinCodeToFlash(String &newPin) {
+void savePinCodeToFlash(String &newPinCode) {
     // Write the new PIN code to flash memory
-    preferences.putString("pinCode", newPin);
+    preferences.putString("pinCode", newPinCode);
     preferences.end();
 }
 
 
 void beep() {
+    tone(BUZZER_PIN, NOTE_B3, 50);
+}
 
+void playSuccessNotes() {
+    tone(BUZZER_PIN, NOTE_C5, 100);
+    tone(BUZZER_PIN, NOTE_D5, 100);
+    tone(BUZZER_PIN, NOTE_F5, 100);
+    tone(BUZZER_PIN, NOTE_G5, 100);
+}
+
+void playErrorNotes() {
+    tone(BUZZER_PIN, NOTE_A2, 500);
 }
 
 void setState() {
