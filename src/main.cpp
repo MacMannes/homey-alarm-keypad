@@ -8,6 +8,7 @@
 #include <Keypad.h>
 #include <Preferences.h>
 #include "tones.h"
+#include "easteregg.h"
 
 uint8_t state = 0;
 
@@ -21,8 +22,8 @@ char keys[ROWS][COLS] = {
         {'*','0','#'}
 };
 
-byte rowPins[ROWS] = { 21, 19, 18, 5}; // Connect to the row pinouts of the keypad
-byte colPins[COLS] = {17, 16, 4};    // Connect to the column pinouts of the keypad
+byte rowPins[ROWS] = { 13, 12, 14, 27}; // Connect to the row pinouts of the keypad
+byte colPins[COLS] = {26, 25, 33};    // Connect to the column pinouts of the keypad
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 Preferences preferences;
@@ -172,6 +173,11 @@ void parseCommand(const String& command) {
                 playSuccessNotes();
                 playSuccessNotes();
 
+                break;
+            }
+            case 1990: {
+                Serial.println("Playing Monkey Island Theme :-D");
+                playMonkeyIslandTune(BUZZER_PIN);
                 break;
             }
             default:
