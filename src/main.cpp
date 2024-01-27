@@ -9,8 +9,14 @@
 #include <Preferences.h>
 #include "tones.h"
 #include "easteregg.h"
+#include <Adafruit_PCD8544.h>
 
 uint8_t state = 0;
+
+uint8_t display_x = 0;
+uint8_t display_y = 20;
+
+bool shouldHideKeyboardEntry = true;
 
 const byte ROWS = 4; // Number of rows in the keypad
 const byte COLS = 3; // Number of columns in the keypad
@@ -28,15 +34,41 @@ byte colPins[COLS] = {26, 25, 33};    // Connect to the column pinouts of the ke
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 Preferences preferences;
 
+
 String pinCode = "0000"; // Default PIN code stored in flash memory
 String currentCommand = "";
 
 const int BUZZER_PIN = 15;
 
+// Pin configuration for Nokia 5110 display
+#define RST_PIN   16  // Reset
+#define CE_PIN    17  // Chip Enable
+#define DC_PIN    2   // Data/Command
+#define DIN_PIN   23  // Data In (MOSI)
+#define CLK_PIN   18  // Clock
+#define BL_PIN    22  // Backlight
+
+Adafruit_PCD8544 display = Adafruit_PCD8544(CLK_PIN, DIN_PIN, DC_PIN, CE_PIN,RST_PIN );
+
+struct KeyValue {
+    int key;
+    const char *value;
+};
+
+struct KeyValue stateTexts[] = {
+        {0, "THUIS"},
+        {1, "SLAPEN"},
+        {2, "AFWEZIG"},
+        {8, "SCHEMA"}
+};
+
 void setState();
 void getState();
 void applyState();
+void displayState();
 void beep();
+void displayKeyboardEntry(char c);
+void clearKeyboardEntry();
 void parseCommand(const String& command);
 void savePinCodeToFlash(String& newPinCode);
 void playSuccessNotes();
@@ -46,6 +78,12 @@ void setup() {
     Serial.begin(115200);
 
     pinMode(BUZZER_PIN, OUTPUT);
+    pinMode(BL_PIN, OUTPUT);
+    digitalWrite(BL_PIN, HIGH);
+
+    display.begin();
+    display.setContrast(60);
+    displayState();
 
     // Open the preferences storage with read/write access
     preferences.begin("keypad", false);
@@ -72,7 +110,6 @@ void setup() {
 
     Serial.println("Connected!");
 
-//    Homey.begin(deviceName, "remote"); //Start Homeyduino
     Homey.begin("Alarm Keypad");
     Homey.setClass("remote");
 
@@ -89,14 +126,20 @@ void loop() {
 
     if (key) {
         beep(); // Produce a beep sound
+        displayKeyboardEntry((shouldHideKeyboardEntry) ? '*' : key);
+        Serial.println(key);
+
+        if (key == '*') {
+            shouldHideKeyboardEntry = false;
+        }
 
         if (key == '#') {
-            Serial.println(key);
+            clearKeyboardEntry();
             // Process the command when # is pressed
             parseCommand(currentCommand);
             currentCommand = ""; // Clear the current command
+            shouldHideKeyboardEntry = true;
         } else {
-            Serial.print(key);
             currentCommand += key; // Append key to the current command
         }
     }
@@ -112,6 +155,9 @@ void parseCommand(const String& command) {
     } else {
         enteredPin = command;
     }
+
+    Serial.print("Entered PIN code: ");
+    Serial.println(pinCode);
 
     if (enteredPin.equals(pinCode)) {
         // Check if entered PIN is correct
@@ -129,28 +175,28 @@ void parseCommand(const String& command) {
         switch (commandValue) {
             case 0: {
                 Serial.println("Turning off the alarm");
-                state = 0;
+                state = commandValue;
                 applyState();
                 playSuccessNotes();
                 break;
             }
             case 1: {
                 Serial.println("Putting the alarm into sleep mode");
-                state = 1;
+                state = commandValue;
                 applyState();
                 playSuccessNotes();
                 break;
             }
             case 2: {
                 Serial.println("Putting the alarm in away mode");
-                state = 1;
+                state = commandValue;
                 applyState();
                 playSuccessNotes();
                 break;
             }
             case 8: {
                 Serial.println("Putting the alarm on scheduled mode");
-                state = 8;
+                state = commandValue;
                 applyState();
                 playSuccessNotes();
                 break;
@@ -202,6 +248,54 @@ void beep() {
     tone(BUZZER_PIN, NOTE_B3, 50);
 }
 
+void clearKeyboardEntry() {
+    display.fillRect(0, 20, 84, 48, WHITE);
+    display.display();
+    display_x = 0;
+    display_y = 20;
+}
+
+void displayKeyboardEntry(char c) {
+    display.setTextSize(1);
+    display.setTextColor(BLACK);
+    display.setCursor(display_x,display_y);
+    display.print(c);
+    display.display();
+    display_x += 6;
+}
+
+void displayState() {
+    display.clearDisplay();  // Clear the display
+
+    display.fillRect(0, 0, 84, 11, BLACK);
+
+    int16_t x = 42;
+    int16_t y = 2;
+    int16_t x1, y1;
+    uint16_t w, h;
+
+    // Determine the size of the array
+    size_t arraySize = sizeof(stateTexts) / sizeof(stateTexts[0]);
+
+    const char *statusText = "ERROR";
+
+    // Search the array for the entry for the current state
+    for (size_t i = 0; i < arraySize; ++i) {
+        if (stateTexts[i].key == state) {
+            statusText = stateTexts[i].value;
+            break;
+        }
+    }
+
+    display.getTextBounds(statusText, x, y, &x1, &y1, &w, &h); //calc width of new string
+    display.setCursor(x - w / 2, y);
+    display.setTextColor(WHITE);
+    display.print(statusText);
+
+    // Display the text on the screen
+    display.display();
+}
+
 void playSuccessNotes() {
     tone(BUZZER_PIN, NOTE_C5, 100);
     tone(BUZZER_PIN, NOTE_D5, 100);
@@ -216,6 +310,8 @@ void playErrorNotes() {
 void setState() {
     state = Homey.value.toInt();
     applyState();
+
+    displayState();
 }
 
 void getState() {
@@ -227,4 +323,6 @@ void getState() {
 void applyState() {
     Serial.println("applyState(): new state is " + String(state));
     Homey.setCapabilityValue("state", state);
+
+    displayState();
 }
