@@ -28,8 +28,8 @@ char keys[ROWS][COLS] = {
         {'*','0','#'}
 };
 
-byte rowPins[ROWS] = { 13, 12, 14, 27}; // Connect to the row pinouts of the keypad
-byte colPins[COLS] = {26, 25, 33};    // Connect to the column pinouts of the keypad
+byte rowPins[ROWS] = { 13, 12, 14, 27 }; // Connect to the row pinouts of the keypad
+byte colPins[COLS] = { 26, 25, 33 };    // Connect to the column pinouts of the keypad
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 Preferences preferences;
@@ -115,8 +115,6 @@ void setup() {
 
     Homey.addAction("Set Alarm State", setState);
     Homey.addCondition("Get Alarm State", getState);
-
-
 }
 
 void loop() {
@@ -323,6 +321,27 @@ void getState() {
 void applyState() {
     Serial.println("applyState(): new state is " + String(state));
     Homey.setCapabilityValue("state", state);
+
+    switch (state) {
+        case 0: {
+                    Homey.trigger("set_alarm_to_home", true);
+                    break;
+                }
+        case 1: {
+                    Homey.trigger("set_alarm_to_sleep", true);
+                    break;
+                }
+        case 2: {
+                    Homey.trigger("set_alarm_to_away", true);
+                    break;
+                }
+        case 8: {
+                    Homey.trigger("set_alarm_to_schedule", true);
+                    break;
+                }
+        default:
+            break;
+    }
 
     displayState();
 }
