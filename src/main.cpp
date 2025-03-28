@@ -58,15 +58,17 @@ struct KeyValue {
 
 struct KeyValue stateTexts[] = {
         {0, "THUIS"},
-        {1, "SLAPEN"},
-        {2, "AFWEZIG"},
+        {1, "AFWEZIG"},
+        {2, "SLAPEN"},
+        {3, "ALERT"},
         {8, "SCHEMA"}
 };
 
 // Define constants for state values
 constexpr int HOME = 0;
-constexpr int SLEEP = 1;
-constexpr int AWAY = 2;
+constexpr int AWAY = 1;
+constexpr int SLEEP = 2;
+constexpr int ALERT = 3;
 constexpr int SCHEDULE = 8;
 
 // Lookup table for string-to-numeric state mapping
@@ -74,7 +76,17 @@ const std::map<String, int> eufyStateMapping = {
     {"home", HOME},
     {"away", AWAY},
     {"custom_1", SLEEP},
-    {"custom_2", SCHEDULE}
+    {"custom_2", ALERT},
+    {"schedule", SCHEDULE}
+};
+
+// Lookup table for state-to-trigger mapping
+const std::map<int, String> stateTriggerMapping = {
+    {HOME, "setAlarmToHome"},
+    {AWAY, "setAlarmToAway"},
+    {SLEEP, "setAlarmToSleep"},
+    {ALERT, "setAlarmToAlert"},
+    {SCHEDULE, "setAlarmToSchedule"}
 };
 
 // Function prototypes
@@ -90,6 +102,8 @@ void parseCommand(const String& command);
 void savePinCodeToFlash(String& newPinCode);
 void playSuccessNotes();
 void playErrorNotes();
+void triggerHomey();
+
 int mapEufyState(const String& state);
 
 void changeAlarmState(int newState, const char* message);
@@ -102,8 +116,9 @@ void executeCommand(int commandValue);
 // Lookup table for command handlers
 const std::map<int, std::function<void()>> commandHandlers = {
     {HOME,      []() { changeAlarmState(HOME, "Turning off the alarm"); }},
-    {SLEEP,     []() { changeAlarmState(SLEEP, "Putting the alarm into sleep mode"); }},
     {AWAY,      []() { changeAlarmState(AWAY, "Putting the alarm in away mode"); }},
+    {SLEEP,     []() { changeAlarmState(SLEEP, "Putting the alarm into sleep mode"); }},
+    {ALERT,     []() { changeAlarmState(ALERT, "Putting the alarm into alert mode"); }},
     {SCHEDULE,  []() { changeAlarmState(SCHEDULE, "Putting the alarm on scheduled mode"); }},
     {99,        []() { handlePinChange("your_command_string_here", 0); }},
     {1990,      playMonkeyIslandTheme}
@@ -292,6 +307,8 @@ void setState() {
 }
 
 void handleEufyStateChange() {
+    Serial.println("Eufy changed Alarm State to " + Homey.value);
+
     int newState = mapEufyState(Homey.value);
     if (newState < 0) return;
 
@@ -327,29 +344,21 @@ int mapEufyState(const String& state) {
 void applyState() {
     Serial.println("applyState(): new state is " + String(state));
     Homey.setCapabilityValue("state", state);
+    triggerHomey();
+    displayState();
+}
 
-    switch (state) {
-        case 0: {
-                    Homey.trigger("set_alarm_to_home", true);
-                    break;
-                }
-        case 1: {
-                    Homey.trigger("set_alarm_to_sleep", true);
-                    break;
-                }
-        case 2: {
-                    Homey.trigger("set_alarm_to_away", true);
-                    break;
-                }
-        case 8: {
-                    Homey.trigger("set_alarm_to_schedule", true);
-                    break;
-                }
-        default:
-            break;
+void triggerHomey() {
+    auto triggerMapping = stateTriggerMapping.find(state);
+    if (triggerMapping == stateTriggerMapping.end()) {
+        return; 
     }
 
-    displayState();
+
+    String trigger = triggerMapping->second;
+    Serial.println("Trigger Homey: " + trigger);
+    Homey.trigger(trigger, true);
+
 }
 
 void executeCommand(int commandValue) {
