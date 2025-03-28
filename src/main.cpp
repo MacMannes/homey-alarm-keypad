@@ -61,7 +61,8 @@ struct KeyValue stateTexts[] = {
         {1, "AFWEZIG"},
         {2, "SLAPEN"},
         {3, "ALERT"},
-        {8, "SCHEMA"}
+        {8, "SCHEMA"},
+        {9, "DISARMED"}
 };
 
 // Define constants for state values
@@ -70,6 +71,7 @@ constexpr int AWAY = 1;
 constexpr int SLEEP = 2;
 constexpr int ALERT = 3;
 constexpr int SCHEDULE = 8;
+constexpr int DISARMED = 9;
 
 // Lookup table for string-to-numeric state mapping
 const std::map<String, int> eufyStateMapping = {
@@ -77,7 +79,8 @@ const std::map<String, int> eufyStateMapping = {
     {"away", AWAY},
     {"custom_1", SLEEP},
     {"custom_2", ALERT},
-    {"schedule", SCHEDULE}
+    {"schedule", SCHEDULE},
+    {"disarmed", DISARMED}
 };
 
 // Lookup table for state-to-trigger mapping
