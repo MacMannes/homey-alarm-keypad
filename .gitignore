@@ -1,5 +1,7 @@
 .pio
 .idea
 .DS_STORE
+.cache
+compile_commands.json
 
 src/wifi_config.h
