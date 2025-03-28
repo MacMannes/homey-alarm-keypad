@@ -10,6 +10,7 @@
 #include "tones.h"
 #include "easteregg.h"
 #include <Adafruit_PCD8544.h>
+#include <map>
 
 uint8_t state = 0;
 
@@ -62,10 +63,26 @@ struct KeyValue stateTexts[] = {
         {8, "SCHEMA"}
 };
 
+// Define constants for state values
+constexpr int HOME = 0;
+constexpr int SLEEP = 1;
+constexpr int AWAY = 2;
+constexpr int SCHEDULE = 8;
+
+// Lookup table for string-to-numeric state mapping
+const std::map<String, int> eufyStateMapping = {
+    {"home", HOME},
+    {"away", AWAY},
+    {"custom_1", SLEEP},
+    {"custom_2", SCHEDULE}
+};
+
+// Function prototypes
 void setState();
 void getState();
 void applyState();
 void displayState();
+void handleEufyStateChange();
 void beep();
 void displayKeyboardEntry(char c);
 void clearKeyboardEntry();
@@ -73,6 +90,24 @@ void parseCommand(const String& command);
 void savePinCodeToFlash(String& newPinCode);
 void playSuccessNotes();
 void playErrorNotes();
+int mapEufyState(const String& state);
+
+void changeAlarmState(int newState, const char* message);
+void handlePinChange(const String& command, int separatorIndex);
+void playMonkeyIslandTheme();
+void invalidCommand();
+void executeCommand(int commandValue);
+
+
+// Lookup table for command handlers
+const std::map<int, std::function<void()>> commandHandlers = {
+    {HOME,      []() { changeAlarmState(HOME, "Turning off the alarm"); }},
+    {SLEEP,     []() { changeAlarmState(SLEEP, "Putting the alarm into sleep mode"); }},
+    {AWAY,      []() { changeAlarmState(AWAY, "Putting the alarm in away mode"); }},
+    {SCHEDULE,  []() { changeAlarmState(SCHEDULE, "Putting the alarm on scheduled mode"); }},
+    {99,        []() { handlePinChange("your_command_string_here", 0); }},
+    {1990,      playMonkeyIslandTheme}
+};
 
 void setup() {
     Serial.begin(115200);
@@ -114,6 +149,7 @@ void setup() {
     Homey.setClass("remote");
 
     Homey.addAction("Set Alarm State", setState);
+    Homey.addAction("handleEufyStateChange",  handleEufyStateChange);
     Homey.addCondition("Get Alarm State", getState);
 }
 
@@ -170,64 +206,7 @@ void parseCommand(const String& command) {
             commandValue = numericCommand.toInt();
         }
 
-        switch (commandValue) {
-            case 0: {
-                Serial.println("Turning off the alarm");
-                state = commandValue;
-                applyState();
-                playSuccessNotes();
-                break;
-            }
-            case 1: {
-                Serial.println("Putting the alarm into sleep mode");
-                state = commandValue;
-                applyState();
-                playSuccessNotes();
-                break;
-            }
-            case 2: {
-                Serial.println("Putting the alarm in away mode");
-                state = commandValue;
-                applyState();
-                playSuccessNotes();
-                break;
-            }
-            case 8: {
-                Serial.println("Putting the alarm on scheduled mode");
-                state = commandValue;
-                applyState();
-                playSuccessNotes();
-                break;
-            }
-            case 99: {
-                // Change the PIN code
-                int newPinIndex = command.indexOf('*', separatorIndex + 1);
-                if (newPinIndex != -1) {
-                    String newPin = command.substring(newPinIndex + 1);
-                    pinCode = newPin;
-                    Serial.print("PIN code changed to: ");
-                    Serial.println(pinCode);
-
-                    // Save the new PIN code to flash memory
-                    savePinCodeToFlash(pinCode);
-                } else {
-                    Serial.println("Invalid command format");
-                }
-
-                playSuccessNotes();
-                playSuccessNotes();
-
-                break;
-            }
-            case 1990: {
-                Serial.println("Playing Monkey Island Theme :-D");
-                playMonkeyIslandTune(BUZZER_PIN);
-                break;
-            }
-            default:
-                Serial.println("Invalid command");
-                playErrorNotes();
-        }
+        executeCommand(commandValue);
     } else {
         Serial.println("Incorrect PIN code");
         playErrorNotes();
@@ -312,11 +291,38 @@ void setState() {
     displayState();
 }
 
+void handleEufyStateChange() {
+    int newState = mapEufyState(Homey.value);
+    if (newState < 0) return;
+
+    state = newState;
+    displayState();
+    playSuccessNotes();
+}
+
 void getState() {
     Serial.println("getState(): state is "+String(state));
     return Homey.returnResult(state);
 }
 
+String normalizeString(const String& input) {
+    String result = input;
+    result.trim();   // Remove leading/trailing spaces
+    result.toLowerCase(); // Convert to lowercase
+    return result;
+}
+
+int mapEufyState(const String& state) {
+    String normalizedState = normalizeString(state);
+
+    auto it = eufyStateMapping.find(normalizedState);
+    if (it == eufyStateMapping.end()) {
+        Serial.print("Invalid eufy state: ");
+        Serial.println(state);
+        return -1; 
+    }
+    return it->second;
+}
 
 void applyState() {
     Serial.println("applyState(): new state is " + String(state));
@@ -345,3 +351,45 @@ void applyState() {
 
     displayState();
 }
+
+void executeCommand(int commandValue) {
+    auto it = commandHandlers.find(commandValue);
+    if (it == commandHandlers.end()) {
+        invalidCommand();
+        return;
+    }
+    it->second(); // Call the function mapped to the command
+}
+
+void changeAlarmState(int newState, const char* message) {
+    Serial.println(message);
+    state = newState;
+    applyState();
+    playSuccessNotes();
+}
+
+void handlePinChange(const String& command, int separatorIndex) {
+    int newPinIndex = command.indexOf('*', separatorIndex + 1);
+    if (newPinIndex != -1) {
+        String newPin = command.substring(newPinIndex + 1);
+        pinCode = newPin;
+        Serial.print("PIN code changed to: ");
+        Serial.println(pinCode);
+        savePinCodeToFlash(pinCode);
+        playSuccessNotes();
+        playSuccessNotes();
+        return;
+    }
+    Serial.println("Invalid command format");
+}
+
+void playMonkeyIslandTheme() {
+    Serial.println("Playing Monkey Island Theme :-D");
+    playMonkeyIslandTune(9); // Replace with actual buzzer pin
+}
+
+void invalidCommand() {
+    Serial.println("Invalid command");
+    playErrorNotes();
+}
+
