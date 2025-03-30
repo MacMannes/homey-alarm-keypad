@@ -335,7 +335,7 @@ int mapEufyState(const String &state) {
         Serial.println(state);
         return -1;
     }
-    return it->second;
+    return eufyState->second;
 }
 
 void applyState() {
@@ -389,7 +389,7 @@ void handlePinChange(const String &command, int separatorIndex) {
 
 void playMonkeyIslandTheme() {
     Serial.println("Playing Monkey Island Theme :-D");
-    playMonkeyIslandTune(9);  // Replace with actual buzzer pin
+    playMonkeyIslandTune(BUZZER_PIN);
 }
 
 void invalidCommand() {
