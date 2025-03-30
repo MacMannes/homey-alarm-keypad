@@ -329,8 +329,8 @@ String normalizeString(const String &input) {
 int mapEufyState(const String &state) {
     String normalizedState = normalizeString(state);
 
-    auto it = eufyStateMapping.find(normalizedState);
-    if (it == eufyStateMapping.end()) {
+    auto eufyState = eufyStateMapping.find(normalizedState);
+    if (eufyState == eufyStateMapping.end()) {
         Serial.print("Invalid eufy state: ");
         Serial.println(state);
         return -1;
