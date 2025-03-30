@@ -1,4 +1,6 @@
 CompileFlags:
+  Add:
+    - -ferror-limit=0
   Remove: 
     - -fipa-pta
     - -mlongcalls
@@ -6,4 +8,12 @@ CompileFlags:
     - -mtext-section-literals
     - -fno-tree-switch-conversion
     - -fstrict-volatile-bitfields
+Diagnostics:
+  Suppress: 
+    - redefinition_different_typedef
+    - attribute_section_invalid_for_target
+    - ovl_no_viable_member_function_in_call
+    - undeclared_var_use
+    - unknown_typename
+    - block_on_nonlocal
 
