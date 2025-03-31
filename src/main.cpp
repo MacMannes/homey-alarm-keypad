@@ -10,6 +10,8 @@
 
 #include <map>
 
+#include "HardwareSerial.h"
+#include "LEDControl.h"
 #include "easteregg.h"
 #include "tones.h"
 #include "wifi_config.h"
@@ -51,6 +53,14 @@ const int BUZZER_PIN = 15;
 #define BL_PIN  22  // Backlight
 
 Adafruit_PCD8544 display = Adafruit_PCD8544(CLK_PIN, DIN_PIN, DC_PIN, CE_PIN, RST_PIN);
+
+constexpr int RED_LED_PIN    = 32;
+constexpr int ORANGE_LED_PIN = 1;
+constexpr int GREEN_LED_PIN  = 3;
+
+LEDControl redLED    = LEDControl(RED_LED_PIN);
+LEDControl orangeLED = LEDControl(ORANGE_LED_PIN);
+LEDControl greenLED  = LEDControl(GREEN_LED_PIN);
 
 struct KeyValue {
     int key;
@@ -107,6 +117,8 @@ void savePinCodeToFlash(String &newPinCode);
 void playSuccessNotes();
 void playErrorNotes();
 void triggerHomey();
+void setLEDBrightness(int brightness);
+void displayLEDState();
 
 int mapEufyState(const String &state);
 
@@ -133,6 +145,8 @@ void setup() {
     pinMode(BUZZER_PIN, OUTPUT);
     pinMode(BL_PIN, OUTPUT);
     digitalWrite(BL_PIN, HIGH);
+
+    setLEDBrightness(5);
 
     display.begin();
     display.setContrast(60);
@@ -285,6 +299,29 @@ void displayState() {
 
     // Display the text on the screen
     display.display();
+
+    displayLEDState();
+}
+
+void displayLEDState() {
+    redLED.off();
+    orangeLED.off();
+    greenLED.off();
+
+    if (state == AWAY || state == SLEEP) {
+        Serial.println("RED on");
+        redLED.on();
+        return;
+    }
+
+    if (state == ALERT || state == SCHEDULE) {
+        Serial.println("ORANGE on");
+        orangeLED.on();
+        return;
+    }
+
+    Serial.println("GREEN on");
+    greenLED.on();
 }
 
 void playSuccessNotes() {
@@ -295,6 +332,12 @@ void playSuccessNotes() {
 }
 
 void playErrorNotes() { tone(BUZZER_PIN, NOTE_A2, 500); }
+
+void setLEDBrightness(int brightness) {
+    redLED.setBrightness(brightness);
+    orangeLED.setBrightness(brightness);
+    greenLED.setBrightness(brightness);
+}
 
 void setState() {
     state = Homey.value.toInt();
