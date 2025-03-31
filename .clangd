@@ -12,8 +12,5 @@ Diagnostics:
   Suppress: 
     - redefinition_different_typedef
     - attribute_section_invalid_for_target
-    - ovl_no_viable_member_function_in_call
-    - undeclared_var_use
-    - unknown_typename
     - block_on_nonlocal
 
