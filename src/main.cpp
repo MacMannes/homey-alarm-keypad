@@ -55,8 +55,8 @@ const int BUZZER_PIN = 15;
 Adafruit_PCD8544 display = Adafruit_PCD8544(CLK_PIN, DIN_PIN, DC_PIN, CE_PIN, RST_PIN);
 
 constexpr int RED_LED_PIN    = 32;
-constexpr int ORANGE_LED_PIN = 1;
-constexpr int GREEN_LED_PIN  = 3;
+constexpr int ORANGE_LED_PIN = 4;
+constexpr int GREEN_LED_PIN  = 5;
 
 LEDControl redLED    = LEDControl(RED_LED_PIN);
 LEDControl orangeLED = LEDControl(ORANGE_LED_PIN);
@@ -146,7 +146,7 @@ void setup() {
     pinMode(BL_PIN, OUTPUT);
     digitalWrite(BL_PIN, HIGH);
 
-    setLEDBrightness(5);
+    setLEDBrightness(7);
 
     display.begin();
     display.setContrast(60);
