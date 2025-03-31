@@ -6,6 +6,7 @@ This is a work in progress.
 
 To compile this project, create a file named `wifi_config.h` in the `src` folder with this content:
 
+```c
 #ifndef WIFI_CONFIG_H
 #define WIFI_CONFIG_H
 
@@ -13,3 +14,4 @@ To compile this project, create a file named `wifi_config.h` in the `src` folder
 #define WIFI_PASSWORD "YourWiFiPassword"
 
 #endif
+```
