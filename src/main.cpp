@@ -123,10 +123,10 @@ void displayLEDState();
 int mapEufyState(const String &state);
 
 void changeAlarmState(int newState, const char *message);
-void handlePinChange(const String &command, int separatorIndex);
+void handlePinChange(const String &command);
 void playMonkeyIslandTheme();
 void invalidCommand();
-void executeCommand(int commandValue);
+void executeCommand(int commandValue, const String &command);
 
 // Lookup table for command handlers
 const std::map<int, std::function<void()>> commandHandlers = {
@@ -135,7 +135,6 @@ const std::map<int, std::function<void()>> commandHandlers = {
     { SLEEP,    []() { changeAlarmState(SLEEP, "Putting the alarm into sleep mode"); }      },
     { ALERT,    []() { changeAlarmState(ALERT, "Putting the alarm into alert mode"); }      },
     { SCHEDULE, []() { changeAlarmState(SCHEDULE, "Putting the alarm on scheduled mode"); } },
-    { 99,       []() { handlePinChange("your_command_string_here", 0); }                    },
     { 1990,     playMonkeyIslandTheme                                                       }
 };
 
@@ -237,7 +236,7 @@ void parseCommand(const String &command) {
             commandValue          = numericCommand.toInt();
         }
 
-        executeCommand(commandValue);
+        executeCommand(commandValue, command);
     } else {
         Serial.println("Incorrect PIN code");
         playErrorNotes();
@@ -399,7 +398,12 @@ void triggerHomey() {
     Homey.trigger(trigger, true);
 }
 
-void executeCommand(int commandValue) {
+void executeCommand(int commandValue, const String &command) {
+    if (commandValue == 99) {
+        handlePinChange(command);
+        return;
+    }
+
     auto it = commandHandlers.find(commandValue);
     if (it == commandHandlers.end()) {
         invalidCommand();
@@ -415,8 +419,9 @@ void changeAlarmState(int newState, const char *message) {
     playSuccessNotes();
 }
 
-void handlePinChange(const String &command, int separatorIndex) {
-    int newPinIndex = command.indexOf('*', separatorIndex + 1);
+void handlePinChange(const String &command) {
+    int positionOfFirstStar = command.indexOf('*');
+    int newPinIndex         = command.indexOf('*', positionOfFirstStar + 1);
     if (newPinIndex != -1) {
         String newPin = command.substring(newPinIndex + 1);
         pinCode       = newPin;
