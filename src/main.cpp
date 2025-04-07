@@ -404,12 +404,12 @@ void executeCommand(int commandValue, const String &command) {
         return;
     }
 
-    auto it = commandHandlers.find(commandValue);
-    if (it == commandHandlers.end()) {
+    auto commandHandler = commandHandlers.find(commandValue);
+    if (commandHandler == commandHandlers.end()) {
         invalidCommand();
         return;
     }
-    it->second();  // Call the function mapped to the command
+    commandHandler->second();  // Call the function mapped to the command
 }
 
 void changeAlarmState(int newState, const char *message) {
