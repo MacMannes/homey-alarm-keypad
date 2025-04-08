@@ -3,8 +3,8 @@
 #include <Arduino.h>
 
 class LEDControl {
-   public:
-    explicit LEDControl(uint8_t pin) : _pin(pin) { pinMode(_pin, OUTPUT); }
+public:
+    LEDControl(uint8_t pin) : _pin(pin) { pinMode(_pin, OUTPUT); }
 
     void on() { analogWrite(_pin, _brightness); }
 
@@ -17,7 +17,7 @@ class LEDControl {
         _brightness = map(level, 1, 10, 25, 255);  // Scale 1–10 to 25–255
     }
 
-   private:
+private:
     uint8_t _pin;
     uint8_t _brightness = 255;  // default to max brightness
 };

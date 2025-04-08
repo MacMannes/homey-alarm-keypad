@@ -1,4 +1,3 @@
----
 Language: Cpp
 BasedOnStyle: google
 IndentWidth: 4
@@ -13,5 +12,5 @@ AlignAfterOpenBracket: Align
 Cpp11BracedListStyle: false
 AlignConsecutiveAssignments: true
 AlignConsecutiveMacros: true
----
-
+AccessModifierOffset: -4
+IndentAccessModifiers: false
