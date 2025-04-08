@@ -12,7 +12,7 @@
 
 #include "HardwareSerial.h"
 #include "LEDControl.h"
-#include "easteregg.h"
+#include "easteregg.hpp"
 #include "tones.h"
 #include "wifi_config.h"
 
