@@ -11,7 +11,7 @@
 #include <map>
 
 #include "HardwareSerial.h"
-#include "LEDControl.h"
+#include "LEDControl.hpp"
 #include "easteregg.hpp"
 #include "tones.h"
 #include "wifi_config.h"
