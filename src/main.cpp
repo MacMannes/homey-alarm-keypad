@@ -12,9 +12,11 @@
 
 #include "HardwareSerial.h"
 #include "LEDControl.hpp"
+#include "WifiService.hpp"
 #include "easteregg.hpp"
 #include "tones.h"
-#include "wifi_config.h"
+
+WifiService *wifiService;
 
 uint8_t state = 0;
 
@@ -148,7 +150,13 @@ const std::map<int, std::function<void()>> commandHandlers = {
 };
 
 void setup() {
+    String deviceName = "keypad-" + String(ESP.getEfuseMac());
+
     Serial.begin(115200);
+    display.begin();
+
+    wifiService = new WifiService(deviceName);
+    wifiService->connect();
 
     pinMode(BUZZER_PIN, OUTPUT);
     pinMode(BL_PIN, OUTPUT);
@@ -156,7 +164,6 @@ void setup() {
 
     setLEDBrightness(7);
 
-    display.begin();
     display.setContrast(60);
     displayState();
 
@@ -165,26 +172,6 @@ void setup() {
 
     // Read the PIN code from flash memory
     pinCode = preferences.getString("pinCode", "0000");
-
-    // Generate device name based on ID
-    String deviceName = "keypad-" + String(ESP.getEfuseMac());
-
-    Serial.println("\n\n\nDevice: " + deviceName);
-
-    // Connect to network
-    WiFiClass::setHostname(deviceName.c_str());
-    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-    Serial.println("Connecting WiFi");
-    while (WiFiClass::status() != WL_CONNECTED) {
-        delay(500);
-        Serial.print(".");
-    }
-
-    // Print IP address
-    Serial.print("Connected. IP address: ");
-    Serial.println(WiFi.localIP());
-
-    Serial.println("Connected!");
 
     Homey.begin("Alarm Keypad");
     Homey.setClass("remote");
