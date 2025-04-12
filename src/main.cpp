@@ -84,6 +84,15 @@ constexpr int ALERT    = 3;
 constexpr int SCHEDULE = 8;
 constexpr int DISARMED = 9;
 
+constexpr int CMD_HOME       = 0;
+constexpr int CMD_AWAY       = 1;
+constexpr int CMD_SLEEP      = 2;
+constexpr int CMD_ALERT      = 3;
+constexpr int CMD_SCHEDULE   = 8;
+constexpr int CMD_DISARM     = 9;
+constexpr int CMD_CHANGE_PIN = 99;
+constexpr int CMD_EASTER_EGG = 1990;
+
 // Lookup table for string-to-numeric state mapping
 const std::map<String, int> eufyStateMapping = {
     { "home",     HOME     },
@@ -130,12 +139,12 @@ void executeCommand(int commandValue, const String &command);
 
 // Lookup table for command handlers
 const std::map<int, std::function<void()>> commandHandlers = {
-    { HOME,     []() { changeAlarmState(HOME, "Turning off the alarm"); }                   },
-    { AWAY,     []() { changeAlarmState(AWAY, "Putting the alarm in away mode"); }          },
-    { SLEEP,    []() { changeAlarmState(SLEEP, "Putting the alarm into sleep mode"); }      },
-    { ALERT,    []() { changeAlarmState(ALERT, "Putting the alarm into alert mode"); }      },
-    { SCHEDULE, []() { changeAlarmState(SCHEDULE, "Putting the alarm on scheduled mode"); } },
-    { 1990,     playMonkeyIslandTheme                                                       }
+    { CMD_HOME,       []() { changeAlarmState(HOME, "Turning off the alarm"); }                   },
+    { CMD_AWAY,       []() { changeAlarmState(AWAY, "Putting the alarm in away mode"); }          },
+    { CMD_SLEEP,      []() { changeAlarmState(SLEEP, "Putting the alarm into sleep mode"); }      },
+    { CMD_ALERT,      []() { changeAlarmState(ALERT, "Putting the alarm into alert mode"); }      },
+    { CMD_SCHEDULE,   []() { changeAlarmState(SCHEDULE, "Putting the alarm on scheduled mode"); } },
+    { CMD_EASTER_EGG, playMonkeyIslandTheme                                                       }
 };
 
 void setup() {
@@ -290,7 +299,7 @@ void displayState() {
         }
     }
 
-    // calc width of new string
+    // Calculate width of new string
     display.getTextBounds(statusText, x, y, &x1, &y1, &w, &h);
     display.setCursor(x - w / 2, y);
     display.setTextColor(WHITE);
@@ -399,7 +408,7 @@ void triggerHomey() {
 }
 
 void executeCommand(int commandValue, const String &command) {
-    if (commandValue == 99) {
+    if (commandValue == CMD_CHANGE_PIN) {
         handlePinChange(command);
         return;
     }
