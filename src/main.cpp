@@ -11,12 +11,14 @@
 #include <map>
 
 #include "HardwareSerial.h"
-#include "LEDControl.hpp"
+#include "States.h"
+#include "StatusLEDs.hpp"
 #include "WifiService.hpp"
 #include "easteregg.hpp"
 #include "tones.h"
 
 WifiService *wifiService;
+StatusLEDs statusLEDs;
 
 uint8_t state = 0;
 
@@ -56,21 +58,7 @@ const int BUZZER_PIN = 15;
 
 Adafruit_PCD8544 display = Adafruit_PCD8544(CLK_PIN, DIN_PIN, DC_PIN, CE_PIN, RST_PIN);
 
-constexpr int RED_LED_PIN    = 32;
-constexpr int ORANGE_LED_PIN = 4;
-constexpr int GREEN_LED_PIN  = 5;
-
-LEDControl redLED    = LEDControl(RED_LED_PIN);
-LEDControl orangeLED = LEDControl(ORANGE_LED_PIN);
-LEDControl greenLED  = LEDControl(GREEN_LED_PIN);
-
 // Define constants for state values
-constexpr int HOME     = 0;
-constexpr int AWAY     = 1;
-constexpr int SLEEP    = 2;
-constexpr int ALERT    = 3;
-constexpr int SCHEDULE = 8;
-constexpr int DISARMED = 9;
 
 struct KeyValue {
     int key;
@@ -119,7 +107,6 @@ void savePinCodeToFlash(String &newPinCode);
 void playSuccessNotes();
 void playErrorNotes();
 void triggerHomey();
-void setLEDBrightness(int brightness);
 void displayLEDState();
 
 int mapEufyState(const String &state);
@@ -162,7 +149,7 @@ void setup() {
     pinMode(BL_PIN, OUTPUT);
     digitalWrite(BL_PIN, HIGH);
 
-    setLEDBrightness(7);
+    statusLEDs.setBrightness(7);
 
     display.setContrast(60);
     displayState();
@@ -295,28 +282,7 @@ void displayState() {
     // Display the text on the screen
     display.display();
 
-    displayLEDState();
-}
-
-void displayLEDState() {
-    redLED.off();
-    orangeLED.off();
-    greenLED.off();
-
-    if (state == AWAY || state == SLEEP) {
-        Serial.println("RED on");
-        redLED.on();
-        return;
-    }
-
-    if (state == ALERT || state == SCHEDULE) {
-        Serial.println("ORANGE on");
-        orangeLED.on();
-        return;
-    }
-
-    Serial.println("GREEN on");
-    greenLED.on();
+    statusLEDs.setState(state);
 }
 
 void playSuccessNotes() {
@@ -327,12 +293,6 @@ void playSuccessNotes() {
 }
 
 void playErrorNotes() { tone(BUZZER_PIN, NOTE_A2, 500); }
-
-void setLEDBrightness(int brightness) {
-    redLED.setBrightness(brightness);
-    orangeLED.setBrightness(brightness);
-    greenLED.setBrightness(brightness);
-}
 
 void setState() {
     state = Homey.value.toInt();
