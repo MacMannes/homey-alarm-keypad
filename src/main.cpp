@@ -64,20 +64,6 @@ LEDControl redLED    = LEDControl(RED_LED_PIN);
 LEDControl orangeLED = LEDControl(ORANGE_LED_PIN);
 LEDControl greenLED  = LEDControl(GREEN_LED_PIN);
 
-struct KeyValue {
-    int key;
-    const char *value;
-};
-
-struct KeyValue stateTexts [] = {
-    { 0, "THUIS"    },
-    { 1, "AFWEZIG"  },
-    { 2, "SLAPEN"   },
-    { 3, "ALERT"    },
-    { 8, "SCHEMA"   },
-    { 9, "DISARMED" }
-};
-
 // Define constants for state values
 constexpr int HOME     = 0;
 constexpr int AWAY     = 1;
@@ -86,14 +72,19 @@ constexpr int ALERT    = 3;
 constexpr int SCHEDULE = 8;
 constexpr int DISARMED = 9;
 
-constexpr int CMD_HOME       = 0;
-constexpr int CMD_AWAY       = 1;
-constexpr int CMD_SLEEP      = 2;
-constexpr int CMD_ALERT      = 3;
-constexpr int CMD_SCHEDULE   = 8;
-constexpr int CMD_DISARM     = 9;
-constexpr int CMD_CHANGE_PIN = 99;
-constexpr int CMD_EASTER_EGG = 1990;
+struct KeyValue {
+    int key;
+    const char *value;
+};
+
+struct KeyValue stateTexts [] = {
+    { HOME,     "THUIS"    },
+    { AWAY,     "AFWEZIG"  },
+    { SLEEP,    "SLAPEN"   },
+    { ALERT,    "ALERT"    },
+    { SCHEDULE, "SCHEMA"   },
+    { DISARMED, "DISARMED" }
+};
 
 // Lookup table for string-to-numeric state mapping
 const std::map<String, int> eufyStateMapping = {
@@ -138,6 +129,15 @@ void handlePinChange(const String &command);
 void playMonkeyIslandTheme();
 void invalidCommand();
 void executeCommand(int commandValue, const String &command);
+
+constexpr int CMD_HOME       = 0;
+constexpr int CMD_AWAY       = 1;
+constexpr int CMD_SLEEP      = 2;
+constexpr int CMD_ALERT      = 3;
+constexpr int CMD_SCHEDULE   = 8;
+constexpr int CMD_DISARM     = 9;
+constexpr int CMD_CHANGE_PIN = 99;
+constexpr int CMD_EASTER_EGG = 1990;
 
 // Lookup table for command handlers
 const std::map<int, std::function<void()>> commandHandlers = {
