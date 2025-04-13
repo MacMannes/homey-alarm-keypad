@@ -1,6 +1,6 @@
 #pragma once
 
-enum class SystemState {
+enum class AlarmState {
     UNKNOWN  = -1,
     HOME     = 0,
     AWAY     = 1,

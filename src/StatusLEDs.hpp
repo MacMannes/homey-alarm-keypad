@@ -1,8 +1,7 @@
 #pragma once
 
+#include "AlarmState.hpp"
 #include "LEDControl.hpp"
-#include "States.h"
-#include "SystemState.hpp"
 
 class StatusLEDs {
 public:
@@ -10,20 +9,20 @@ public:
 
     void init() {}
 
-    void setState(int state) { setState(static_cast<SystemState>(state)); }
+    void setState(int state) { setState(static_cast<AlarmState>(state)); }
 
-    void setState(SystemState state) {
+    void setState(AlarmState state) {
         redLED.off();
         orangeLED.off();
         greenLED.off();
 
-        if (state == SystemState::AWAY || state == SystemState::SLEEP) {
+        if (state == AlarmState::AWAY || state == AlarmState::SLEEP) {
             Serial.println("RED on");
             redLED.on();
             return;
         }
 
-        if (state == SystemState::ALERT || state == SystemState::SCHEDULE) {
+        if (state == AlarmState::ALERT || state == AlarmState::SCHEDULE) {
             Serial.println("ORANGE on");
             orangeLED.on();
             return;
