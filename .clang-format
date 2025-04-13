@@ -15,3 +15,5 @@ AlignConsecutiveMacros: true
 AccessModifierOffset: -4
 IndentAccessModifiers: false
 AllowShortEnumsOnASingleLine: false
+# IndentNamespace: true
+NamespaceIndentation: All
