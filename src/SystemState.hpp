@@ -1,6 +1,7 @@
 #pragma once
 
 enum class SystemState {
+    UNKNOWN  = -1,
     HOME     = 0,
     AWAY     = 1,
     SLEEP    = 2,
