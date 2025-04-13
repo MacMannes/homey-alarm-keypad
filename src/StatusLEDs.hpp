@@ -2,6 +2,7 @@
 
 #include "LEDControl.hpp"
 #include "States.h"
+#include "SystemState.hpp"
 
 class StatusLEDs {
 public:
@@ -9,18 +10,20 @@ public:
 
     void init() {}
 
-    void setState(int state) {
+    void setState(int state) { setState(static_cast<SystemState>(state)); }
+
+    void setState(SystemState state) {
         redLED.off();
         orangeLED.off();
         greenLED.off();
 
-        if (state == AWAY || state == SLEEP) {
+        if (state == SystemState::AWAY || state == SystemState::SLEEP) {
             Serial.println("RED on");
             redLED.on();
             return;
         }
 
-        if (state == ALERT || state == SCHEDULE) {
+        if (state == SystemState::ALERT || state == SystemState::SCHEDULE) {
             Serial.println("ORANGE on");
             orangeLED.on();
             return;
