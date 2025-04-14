@@ -7,29 +7,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository 
+      - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Create wifi_config.h
         run: |
           mkdir -p src
-          cat <<EOF > src/wifi_config.h
-#ifndef WIFI_CONFIG_H
-#define WIFI_CONFIG_H
+          echo '#ifndef WIFI_CONFIG_H' > src/wifi_config.h
+          echo '#define WIFI_CONFIG_H' >> src/wifi_config.h
+          echo '' >> src/wifi_config.h
+          echo '#define WIFI_SSID "YourWiFiSSID"' >> src/wifi_config.h
+          echo '#define WIFI_PASSWORD "YourWiFiPassword"' >> src/wifi_config.h
+          echo '' >> src/wifi_config.h
+          echo '#endif' >> src/wifi_config.h
 
-#define WIFI_SSID "YourWiFiSSID"
-#define WIFI_PASSWORD "YourWiFiPassword"
-
-#endif
-EOF
       - uses: actions/cache@v4
         with:
           path: |
             ~/.cache/pip
             ~/.platformio/.cache
           key: ${{ runner.os }}-pio
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Install PlatformIO Core
         run: pip install --upgrade platformio
 
