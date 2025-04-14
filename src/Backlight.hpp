@@ -2,11 +2,11 @@
 
 #include <Arduino.h>
 
-#include "LEDControl.hpp"
+#include "LED.hpp"
 
-class BacklightManager {
+class Backlight {
 public:
-    BacklightManager(LEDControl& led, unsigned long timeoutMs = 60000)
+    Backlight(LED& led, unsigned long timeoutMs = 60000)
         : _led(led), _timeout(timeoutMs), _lastActivity(0), _isOn(false) {}
 
     void begin() {
@@ -31,7 +31,7 @@ public:
     }
 
 private:
-    LEDControl& _led;
+    LED& _led;
     unsigned long _timeout;
     unsigned long _lastActivity;
     bool _isOn;

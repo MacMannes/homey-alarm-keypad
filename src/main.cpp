@@ -10,7 +10,7 @@
 
 #include <map>
 
-#include "BacklightManager.hpp"
+#include "Backlight.hpp"
 #include "HardwareSerial.h"
 #include "States.h"
 #include "StatusLEDs.hpp"
@@ -59,8 +59,8 @@ const int BUZZER_PIN = 15;
 
 Adafruit_PCD8544 display = Adafruit_PCD8544(CLK_PIN, DIN_PIN, DC_PIN, CE_PIN, RST_PIN);
 
-LEDControl backlightLed(BL_PIN);
-BacklightManager backlight(backlightLed);
+LED backlightLed(BL_PIN);
+Backlight backlight(backlightLed);
 
 // Define constants for state values
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AlarmState.hpp"
-#include "LEDControl.hpp"
+#include "LED.hpp"
 
 class StatusLEDs {
 public:
@@ -43,7 +43,7 @@ private:
     static constexpr int ORANGE_LED_PIN = 4;
     static constexpr int GREEN_LED_PIN  = 5;
 
-    LEDControl redLED;
-    LEDControl orangeLED;
-    LEDControl greenLED;
+    LED redLED;
+    LED orangeLED;
+    LED greenLED;
 };

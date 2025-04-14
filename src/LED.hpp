@@ -2,9 +2,9 @@
 
 #include <Arduino.h>
 
-class LEDControl {
+class LED {
 public:
-    LEDControl(uint8_t pin) : _pin(pin) { pinMode(_pin, OUTPUT); }
+    LED(uint8_t pin) : _pin(pin) { pinMode(_pin, OUTPUT); }
 
     void on() { analogWrite(_pin, _brightness); }
 
