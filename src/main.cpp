@@ -10,6 +10,7 @@
 
 #include <map>
 
+#include "BacklightManager.hpp"
 #include "HardwareSerial.h"
 #include "States.h"
 #include "StatusLEDs.hpp"
@@ -57,6 +58,9 @@ const int BUZZER_PIN = 15;
 #define BL_PIN  22  // Backlight
 
 Adafruit_PCD8544 display = Adafruit_PCD8544(CLK_PIN, DIN_PIN, DC_PIN, CE_PIN, RST_PIN);
+
+LEDControl backlightLed(BL_PIN);
+BacklightManager backlight(backlightLed);
 
 // Define constants for state values
 
@@ -142,12 +146,13 @@ void setup() {
     Serial.begin(115200);
     display.begin();
 
+    backlightLed.setBrightness(8);
+    backlight.begin();
+
     wifiService = new WifiService(deviceName);
     wifiService->connect();
 
     pinMode(BUZZER_PIN, OUTPUT);
-    pinMode(BL_PIN, OUTPUT);
-    digitalWrite(BL_PIN, HIGH);
 
     statusLEDs.setBrightness(7);
 
@@ -170,10 +175,13 @@ void setup() {
 
 void loop() {
     Homey.loop();
+    backlight.update();
 
     char key = keypad.getKey();
 
     if (key) {
+        backlight.registerActivity();
+
         beep();  // Produce a beep sound
         displayKeyboardEntry((shouldHideKeyboardEntry) ? '*' : key);
         Serial.println(key);
