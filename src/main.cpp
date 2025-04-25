@@ -15,6 +15,7 @@
 #include "States.h"
 #include "StatusLEDs.hpp"
 #include "WifiService.hpp"
+#include "config.h"
 #include "easteregg.hpp"
 #include "tones.h"
 
@@ -38,8 +39,13 @@ char keys [ROWS][COLS] = {
     { '*', '0', '#' }
 };
 
+#ifdef KEYPAD_1
 byte rowPins [ROWS] = { 13, 12, 14, 27 };
 byte colPins [COLS] = { 26, 25, 33 };
+#elif defined(KEYPAD_2)
+byte rowPins [ROWS] = { 12, 33, 25, 27 };
+byte colPins [COLS] = { 14, 13, 26 };
+#endif
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 Preferences preferences;
