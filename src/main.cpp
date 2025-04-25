@@ -151,18 +151,18 @@ void setup() {
 
     Serial.begin(115200);
     display.begin();
+    display.setContrast(60);
 
     backlightLed.setBrightness(8);
     backlight.begin();
 
-    wifiService = new WifiService(deviceName);
+    wifiService = new WifiService(deviceName, display);
     wifiService->connect();
 
     pinMode(BUZZER_PIN, OUTPUT);
 
     statusLEDs.setBrightness(7);
 
-    display.setContrast(60);
     displayState();
 
     // Open the preferences storage with read/write access
