@@ -164,11 +164,12 @@ void setup() {
     wifiService->connect();
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(200, "text/plain", "Hi! This is ElegantOTA AsyncDemo.");
+        request->send(200, "text/plain", "Alarm Keypad is online!");
     });
 
     ElegantOTA.begin(&server);
     server.begin();
+    Serial.println("HTTP server started");
 
     pinMode(BUZZER_PIN, OUTPUT);
 
