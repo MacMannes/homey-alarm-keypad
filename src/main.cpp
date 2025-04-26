@@ -138,8 +138,9 @@ constexpr int CMD_SLEEP      = 2;
 constexpr int CMD_ALERT      = 3;
 constexpr int CMD_SCHEDULE   = 8;
 constexpr int CMD_DISARM     = 9;
-constexpr int CMD_CHANGE_PIN = 99;
 constexpr int CMD_INFO       = 77;
+constexpr int CMD_REBOOT     = 88;
+constexpr int CMD_CHANGE_PIN = 99;
 constexpr int CMD_EASTER_EGG = 1990;
 
 // Lookup table for command handlers
@@ -149,6 +150,7 @@ const std::map<int, std::function<void()>> commandHandlers = {
     { CMD_SLEEP,      []() { changeAlarmState(SLEEP, "Putting the alarm into sleep mode"); }      },
     { CMD_ALERT,      []() { changeAlarmState(ALERT, "Putting the alarm into alert mode"); }      },
     { CMD_SCHEDULE,   []() { changeAlarmState(SCHEDULE, "Putting the alarm on scheduled mode"); } },
+    { CMD_REBOOT,     esp_restart                                                                 },
     { CMD_INFO,       displayInfo                                                                 },
     { CMD_EASTER_EGG, playMonkeyIslandTheme                                                       }
 };
