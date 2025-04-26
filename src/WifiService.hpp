@@ -34,7 +34,7 @@ public:
         IPAddress ip = WiFi.localIP();
         String ipStr = ip.toString();
 
-        Serial.print("Connected. IP address: ");
+        Serial.print("\nConnected. IP address: ");
         Serial.println(ipStr);
     }
 
