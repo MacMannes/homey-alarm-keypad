@@ -4,6 +4,8 @@
 
 #include <Adafruit_PCD8544.h>
 #include <Arduino.h>
+#include <ESPAsyncWebServer.h>
+#include <ElegantOTA.h>
 #include <Homey.h>
 #include <Keypad.h>
 #include <Preferences.h>
@@ -18,6 +20,8 @@
 #include "config.h"
 #include "easteregg.hpp"
 #include "tones.h"
+
+AsyncWebServer server(80);
 
 WifiService *wifiService;
 StatusLEDs statusLEDs;
@@ -159,6 +163,13 @@ void setup() {
     wifiService = new WifiService(deviceName, display);
     wifiService->connect();
 
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/plain", "Hi! This is ElegantOTA AsyncDemo.");
+    });
+
+    ElegantOTA.begin(&server);
+    server.begin();
+
     pinMode(BUZZER_PIN, OUTPUT);
 
     statusLEDs.setBrightness(7);
@@ -182,6 +193,7 @@ void setup() {
 void loop() {
     Homey.loop();
     backlight.update();
+    ElegantOTA.loop();
 
     char key = keypad.getKey();
 
