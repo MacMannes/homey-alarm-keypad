@@ -169,7 +169,11 @@ void setup() {
     wifiService->connect();
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(200, "text/plain", "Alarm Keypad is online!");
+        String responseMessage = "Alarm Keypad is online!\n\n";
+        responseMessage += "Build Date: " + String(__DATE__) + "\n";
+        responseMessage += "Build Time: " + String(__TIME__);
+
+        request->send(200, "text/plain", responseMessage);
     });
 
     ElegantOTA.begin(&server);
