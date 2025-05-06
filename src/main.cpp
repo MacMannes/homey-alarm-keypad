@@ -27,7 +27,8 @@ AsyncWebServer server(80);
 WifiService *wifiService;
 StatusLEDs statusLEDs;
 
-uint8_t state = 0;
+uint8_t state          = 0;
+bool stateAcknowledged = true;
 
 uint8_t display_x = 0;
 uint8_t display_y = 20;
@@ -208,6 +209,7 @@ void loop() {
     Homey.loop();
     backlight.update();
     ElegantOTA.loop();
+    statusLEDs.loop();
 
     char key = keypad.getKey();
 
@@ -323,7 +325,7 @@ void displayState() {
     // Display the text on the screen
     display.display();
 
-    statusLEDs.setState(state);
+    statusLEDs.setState(state, stateAcknowledged);
 }
 
 void displayInfo() {
@@ -370,7 +372,9 @@ void handleEufyStateChange() {
     int newState = mapEufyState(Homey.value);
     if (newState < 0) return;
 
-    state = newState;
+    state             = newState;
+    stateAcknowledged = true;
+
     displayState();
     playAcknowledgeNotes();
 }
@@ -402,6 +406,7 @@ int mapEufyState(const String &state) {
 void applyState() {
     Serial.println("applyState(): new state is " + String(state));
     Homey.setCapabilityValue("state", state);
+    displayState();
     triggerHomey();
 }
 
@@ -432,7 +437,8 @@ void executeCommand(int commandValue, const String &command) {
 
 void changeAlarmState(int newState, const char *message) {
     Serial.println(message);
-    state = newState;
+    state             = newState;
+    stateAcknowledged = false;
     applyState();
     playSuccessNotes();
 }
