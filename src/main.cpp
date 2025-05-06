@@ -16,6 +16,7 @@
 #include "HardwareSerial.h"
 #include "States.h"
 #include "StatusLEDs.hpp"
+#include "UptimeFormatter.hpp"
 #include "WifiService.hpp"
 #include "config.h"
 #include "easteregg.hpp"
@@ -169,9 +170,11 @@ void setup() {
     wifiService->connect();
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        String responseMessage = "Alarm Keypad is online!\n\n";
+        String responseMessage = "Keypad is online!\n\n";
         responseMessage += "Build Date: " + String(__DATE__) + "\n";
-        responseMessage += "Build Time: " + String(__TIME__);
+        responseMessage += "Build Time: " + String(__TIME__) + "\n\n";
+
+        responseMessage += "Uptime: " + UptimeFormatter::getUptime();
 
         request->send(200, "text/plain", responseMessage);
     });
