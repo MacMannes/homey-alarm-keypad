@@ -28,7 +28,7 @@ WifiService *wifiService;
 StatusLEDs statusLEDs;
 
 uint8_t state          = 0;
-bool stateAcknowledged = true;
+bool stateAcknowledged = false;
 
 uint8_t display_x = 0;
 uint8_t display_y = 20;
@@ -124,6 +124,7 @@ void playSuccessNotes();
 void playAcknowledgeNotes();
 void playErrorNotes();
 void triggerHomey();
+void requestAlarmStateFromHomey();
 void displayLEDState();
 
 int mapEufyState(const String &state);
@@ -343,6 +344,9 @@ void displayInfo() {
     display.println(__TIME__);
 
     display.display();
+
+    delay(5000);
+    requestAlarmStateFromHomey();
 }
 
 void playSuccessNotes() {
@@ -419,6 +423,11 @@ void triggerHomey() {
     String trigger = triggerMapping->second;
     Serial.println("Trigger Homey: " + trigger);
     Homey.trigger(trigger, true);
+}
+
+void requestAlarmStateFromHomey() {
+    Serial.println("Requesting alarm state from Homey");
+    Homey.trigger("getAlarmState");
 }
 
 void executeCommand(int commandValue, const String &command) {
