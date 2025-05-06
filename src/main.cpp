@@ -120,6 +120,7 @@ void clearKeyboardEntry();
 void parseCommand(const String &command);
 void savePinCodeToFlash(String &newPinCode);
 void playSuccessNotes();
+void playAcknowledgeNotes();
 void playErrorNotes();
 void triggerHomey();
 void displayLEDState();
@@ -349,6 +350,11 @@ void playSuccessNotes() {
     tone(BUZZER_PIN, NOTE_G5, 100);
 }
 
+void playAcknowledgeNotes() {
+    tone(BUZZER_PIN, NOTE_G5, 150);
+    tone(BUZZER_PIN, NOTE_F5, 200);
+}
+
 void playErrorNotes() { tone(BUZZER_PIN, NOTE_A2, 500); }
 
 void setState() {
@@ -366,7 +372,7 @@ void handleEufyStateChange() {
 
     state = newState;
     displayState();
-    playSuccessNotes();
+    playAcknowledgeNotes();
 }
 
 void getState() {
@@ -397,7 +403,6 @@ void applyState() {
     Serial.println("applyState(): new state is " + String(state));
     Homey.setCapabilityValue("state", state);
     triggerHomey();
-    displayState();
 }
 
 void triggerHomey() {
