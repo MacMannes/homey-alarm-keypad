@@ -30,8 +30,11 @@ StatusLEDs statusLEDs;
 uint8_t state          = 0;
 bool stateAcknowledged = false;
 
-uint8_t display_x = 0;
-uint8_t display_y = 20;
+const uint8_t KEYBOARD_ENTRY_ROW    = 35;
+const uint8_t KEYBOARD_ENTRY_COLUMN = 0;
+
+uint8_t display_x = KEYBOARD_ENTRY_COLUMN;
+uint8_t display_y = KEYBOARD_ENTRY_ROW;
 
 bool shouldHideKeyboardEntry = true;
 
@@ -279,10 +282,10 @@ void savePinCodeToFlash(String &newPinCode) {
 void beep() { tone(BUZZER_PIN, NOTE_B3, 50); }
 
 void clearKeyboardEntry() {
-    display.fillRect(0, 20, 84, 48, WHITE);
+    display.fillRect(KEYBOARD_ENTRY_COLUMN, KEYBOARD_ENTRY_ROW, 84, 48, WHITE);
     display.display();
-    display_x = 0;
-    display_y = 20;
+    display_y = KEYBOARD_ENTRY_ROW;
+    display_x = KEYBOARD_ENTRY_COLUMN;
 }
 
 void displayKeyboardEntry(char c) {
@@ -297,10 +300,8 @@ void displayKeyboardEntry(char c) {
 void displayState() {
     display.clearDisplay();  // Clear the display
 
-    display.fillRect(0, 0, 84, 11, BLACK);
-
     int16_t x = 42;
-    int16_t y = 2;
+    int16_t y = 15;
     int16_t x1, y1;
     uint16_t w, h;
 
@@ -320,7 +321,7 @@ void displayState() {
     // Calculate width of new string
     display.getTextBounds(statusText, x, y, &x1, &y1, &w, &h);
     display.setCursor(x - w / 2, y);
-    display.setTextColor(WHITE);
+    display.setTextColor(BLACK);
     display.print(statusText);
 
     // Display the text on the screen
